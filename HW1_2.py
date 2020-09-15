@@ -91,12 +91,15 @@ while not converged and ii_count < 25:
     ii_count += 1
     num_charges += 1
 
+# Good that you checked both options! There is an ambiguity that will matter
+# for small N.
+print(num_charges-1) # Shown answer .... (I'd put in legend.)
 error = np.asarray(error)
 pyplot.figure(1)
-pyplot.plot(np.arange(1, error.size + 1), error)
+pyplot.loglog(np.arange(1, error.size + 1), error)
 e_ind = (error > 10).nonzero()[0].size
-pyplot.plot(np.arange(1, e_ind+2), error[:e_ind+1])
-pyplot.plot(e_ind+1, error[e_ind], '*')
+pyplot.loglog(np.arange(1, e_ind+2), error[:e_ind+1])
+pyplot.loglog(e_ind+1, error[e_ind], '*')
 pyplot.title('Error Between Exact and Approximation\nUsing fixed end points')
 pyplot.ylabel('Error (%)')
 pyplot.xlabel('Number of charges')
@@ -105,10 +108,11 @@ error1 = error
 
 error = np.asarray(error_2)
 pyplot.figure(2)
-pyplot.plot(np.arange(1, error.size + 1), error)
+pyplot.loglog(np.arange(1, error.size + 1), error)
 e_ind = (error > 10).nonzero()[0].size
-pyplot.plot(np.arange(1, e_ind+2), error[:e_ind+1])
-pyplot.plot(e_ind+1, error[e_ind], '*')
+pyplot.loglog(np.arange(1, e_ind+2), error[:e_ind+1])
+pyplot.loglog(e_ind+1, error[e_ind], '*')
+pyplot.grid()
 pyplot.title('Error Between Exact and Approximation\nUsing deltas from end points')
 pyplot.ylabel('Error (%)')
 pyplot.xlabel('Number of charges')

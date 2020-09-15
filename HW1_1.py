@@ -68,7 +68,8 @@ ds = 0.05
 t_end = 5
 
 
-# I didn't want to kill my computation, so I am only taking the angles that are facing towards my negative charge in
+# I didn't want to kill my computation, so I am only taking the angles that
+# are facing towards my negative charge in
 # increments of 15 degrees
 angles = np.arange(90, 271, 15)
 
@@ -85,6 +86,8 @@ for angle in angles:
     ii_count = 0
     # I know where I want my solution to converge
     while np.linalg.norm([x[-1] + 1, y[-1]]) > 0.05 and ii_count < 100:
+        # The next generalization is to stop when line steps out of box of a
+        # given size.
         dxyds = propagate(0, [x[-1], y[-1]])
         x.append(x[-1] + ds * dxyds[0])
         y.append(y[-1] + ds * dxyds[1])
@@ -92,21 +95,23 @@ for angle in angles:
     pyplot.plot(x, y)
 
     pyplot.figure(2)
+    # FYI: solve_ivp has "events" function that stop integration when an 
+    # event is true.
     output = (spint.solve_ivp(propagate, [0,t_end], [x_0, y_0], t_eval=np.arange(0, t_end, ds)))
     pyplot.plot(output.y[0, :], output.y[1, :])
 
 pyplot.figure(1)
-pyplot.title('Explicit solver')
-pyplot.xlabel('X range in d')
-pyplot.ylabel('Y Range in d')
+pyplot.title('Forward-Euler solver')
+pyplot.xlabel('x/d') # More common syntax
+pyplot.ylabel('y/d')
 pyplot.ylim([-2, 2])
 pyplot.xlim([-2, 2])
 
 pyplot.figure(2)
-pyplot.title('Runge Kutta 54 solver')
-pyplot.xlabel('X range in d')
-pyplot.ylabel('Y Range in d')
+pyplot.title('Runge-Kutta 45 solver')
+pyplot.xlabel('x/d')
+pyplot.ylabel('y/d')
 pyplot.ylim([-2, 2])
 pyplot.xlim([-2, 2])
 
-
+pyplot.show()
