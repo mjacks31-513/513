@@ -93,6 +93,8 @@ while not converged and ii_count < 25:
 
 # Good that you checked both options! There is an ambiguity that will matter
 # for small N.
+# Great plots.
+# For a plot like this, you may want to show dots and a line.
 print(num_charges-1) # Shown answer .... (I'd put in legend.)
 error = np.asarray(error)
 pyplot.figure(1)
