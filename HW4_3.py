@@ -39,8 +39,8 @@ if __name__ == '__main__':
     scales with r^2 to find the correct radii for my points. I am going to build the area sections first 
     and let that inform where I should calculate the B field
     '''
-    # I am setting a static area of 0.25
-    sectionArea = 0.04
+    # I am setting a static area of 0.04
+    sectionArea = 0.01
     endRadius = 1
     startRadius = 0
     numRadii = int(endRadius / sectionArea)
@@ -60,9 +60,10 @@ if __name__ == '__main__':
     points[:, y_ind] = y
 
     B_line_1 = HW4_BiotSavart(points, XYZ_line_1, I_line_1)
-    B_line_2 = HW4_BiotSavart(points, XYZ_line_1, I_line_1)
+    # I reread the assignment, and I don't need this line
+    # B_line_2 = HW4_BiotSavart(points, XYZ_line_1, I_line_1)
 
-    B_total = B_line_1 + B_line_2
+    B_total = B_line_1  # + B_line_2
 
     '''
     This is where the magic happens. I am going to calculate the area of each nested circle and then 
@@ -73,4 +74,5 @@ if __name__ == '__main__':
     areaVector = np.zeros_like(B_total)
     areaVector[:, z_ind] = z
 
-    magneticFlux = (areaVector * B_total).sum()
+    magneticFlux = np.pi * (areaVector * B_total).sum()
+
