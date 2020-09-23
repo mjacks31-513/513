@@ -42,7 +42,7 @@ if __name__ == '__main__':
     '''
     # I am setting a static area of 0.04
     startNumSections = 2
-    endNumSections = 11
+    endNumSections = 16
     areas = 1 / (np.arange(startNumSections, endNumSections) ** 2)
     magneticFluxes = []
     for sectionArea in areas:
@@ -65,8 +65,8 @@ if __name__ == '__main__':
         # cumulativeRadii = np.zeros(numRadii + 2)
         # cumulativeRadii[1:] = edgeRadii
         # x = (cumulativeRadiiSquared[2:] - cumulativeRadiiSquared[:-2]) / 2  # This is a moving average
-        #
-        # x = np.sqrt(edgeRadii[1:]*edgeRadii[:-1])
+
+        x = np.sqrt(edgeRadii[1:]*edgeRadii[:-1])
 
         y = np.zeros_like(numRadii)
         points = np.full((numRadii, dims), ringHt, dtype=np.float64)
