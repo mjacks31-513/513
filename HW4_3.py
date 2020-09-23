@@ -2,6 +2,7 @@ import numpy as np
 
 from HW4_BiotSavart import HW4_BiotSavart
 import numpy as np
+from matplotlib import pyplot
 
 if __name__ == '__main__':
     '''
@@ -40,39 +41,53 @@ if __name__ == '__main__':
     and let that inform where I should calculate the B field
     '''
     # I am setting a static area of 0.04
-    sectionArea = 0.01
-    endRadius = 1
-    startRadius = 0
-    numRadii = int(endRadius / sectionArea)
-    edgeRadii = np.sqrt(np.linspace(startRadius, endRadius, numRadii + 1))
-    '''
-    I want my x values to be in the "middle" of the radii values declared above. The problem is, using 
-    the midpoint is actually going to give me incorrect values because the flux is the strength of the 
-    B field times the size of the area that I am getting that field over, so I want the "middle area"
-    radius, so I am going to take the average area, and then get the b field at that point
-    '''
-    cumulativeRadii = np.cumsum(np.linspace(startRadius, endRadius, numRadii + 1))
-    x = np.zeros(numRadii)
-    x[1:] = np.sqrt((cumulativeRadii[2:] - cumulativeRadii[:-2]) / 2)  # This is a moving average
-    y = np.zeros_like(numRadii)
-    points = np.full((numRadii, dims), ringHt)
-    points[:, x_ind] = x
-    points[:, y_ind] = y
+    startNumSections = 2
+    endNumSections = 11
+    areas = 1 / (np.arange(startNumSections, endNumSections) ** 2)
+    magneticFluxes = []
+    for sectionArea in areas:
+        endRadiusSquared = 1
+        startRadiusSquared = 0
+        numRadii = int(endRadiusSquared / sectionArea)
+        edgeRadii = np.sqrt(np.linspace(startRadiusSquared, endRadiusSquared, numRadii + 1))
+        '''
+        I want my x values to be in the "middle" of the radii values declared above. The problem is, using 
+        the midpoint is actually going to give me incorrect values because the flux is the strength of the 
+        B field times the size of the area that I am getting that field over, so I want the "middle area"
+        radius, so I am going to take the average area, and then get the b field at that point
+        '''
+        cumulativeRadiiSquared = np.zeros(numRadii + 2)
+        cumulativeRadiiSquared[1:] = np.cumsum(np.linspace(startRadiusSquared, endRadiusSquared, numRadii + 1))
+        x = np.sqrt((cumulativeRadiiSquared[2:] - cumulativeRadiiSquared[:-2]) / 2)  # This is a moving average
+        '''
+        I am testing out other radius schemes
+        '''
+        # cumulativeRadii = np.zeros(numRadii + 2)
+        # cumulativeRadii[1:] = edgeRadii
+        # x = (cumulativeRadiiSquared[2:] - cumulativeRadiiSquared[:-2]) / 2  # This is a moving average
+        #
+        # x = np.sqrt(edgeRadii[1:]*edgeRadii[:-1])
 
-    B_line_1 = HW4_BiotSavart(points, XYZ_line_1, I_line_1)
-    # I reread the assignment, and I don't need this line
-    # B_line_2 = HW4_BiotSavart(points, XYZ_line_1, I_line_1)
+        y = np.zeros_like(numRadii)
+        points = np.full((numRadii, dims), ringHt, dtype=np.float64)
+        points[:, x_ind] = x  # This is not working?
+        points[:, y_ind] = y
 
-    B_total = B_line_1  # + B_line_2
+        B_line_1 = HW4_BiotSavart(points, XYZ_line_1, I_line_1)
+        # I reread the assignment, and I don't need this line
+        # B_line_2 = HW4_BiotSavart(points, XYZ_line_2, I_line_2)
 
-    '''
-    This is where the magic happens. I am going to calculate the area of each nested circle and then 
-    dot that into the total B field. Since the normal vector for area is only in the z direction, I
-    can ignore the x and y components to the B field. 
-    '''
-    z = np.full_like(x, sectionArea)
-    areaVector = np.zeros_like(B_total)
-    areaVector[:, z_ind] = z
+        B_total = B_line_1  # + B_line_2
 
-    magneticFlux = np.pi * (areaVector * B_total).sum()
+        '''
+        This is where the magic happens. I am going to calculate the area of each nested circle and then 
+        dot that into the total B field. Since the normal vector for area is only in the z direction, I
+        can ignore the x and y components to the B field. 
+        '''
+        z = np.full_like(x, sectionArea)
+        areaVector = np.zeros_like(B_total)
+        areaVector[:, z_ind] = z
 
+        magneticFluxes.append(np.pi * (areaVector * B_total).sum())
+
+    pyplot.plot(np.arange(startNumSections, endNumSections), magneticFluxes)

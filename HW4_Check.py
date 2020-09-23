@@ -12,7 +12,7 @@ if __name__ == "__main__":
     """
     point = np.array((0, 1, 0))
     allB_1 = []
-    lengths = np.arange(0.2, 10.2, 0.2)
+    lengths = np.arange(0.2, 20.2, 0.2)
     normalizedCurrent = 1
     for halfLength in lengths:
         start = -1 * halfLength
@@ -51,20 +51,21 @@ if __name__ == "__main__":
 
     lineStart = 0
     lineEnd = 1
-    numberOfSegments = np.array(list(range(3, 48)))
+    numberOfSegments = np.array(list(range(3, 100)))
     point = np.array((0, 0, 0))
     allB_2 = []
     for size in numberOfSegments:
         lineDiff = 1 / size
         XYZ = np.zeros((size, 3))
-        XYZ[:, 0] = np.cos(np.arange(lineStart, lineEnd, lineDiff) * 2 * np.pi)
-        XYZ[:, 1] = np.sin(np.arange(lineStart, lineEnd, lineDiff) * 2 * np.pi)
+        # I need to ditch the last segment
+        XYZ[:, 0] = np.cos(np.linspace(lineStart, lineEnd, size+1) * 2 * np.pi)[:-1]
+        XYZ[:, 1] = np.sin(np.linspace(lineStart, lineEnd, size+1) * 2 * np.pi)[:-1]
         allB_2.append(HW4_BiotSavart(point, XYZ, normalizedCurrent))
     B_2 = np.asarray(allB_2).squeeze()
     pyplot.figure(3)
     pyplot.plot(numberOfSegments, B_2[:, 2], 'ro-')
     # Analytical solution is (mu * I) / (2 * R)
-    pyplot.plot([0, 50], [2 * np.pi] * 2, 'k--')
+    pyplot.plot([0, 100], [2 * np.pi] * 2, 'k--')
     pyplot.title('Magnetic Field From a Loop of Current')
     pyplot.xlabel('Number of Line Segments')
     pyplot.ylabel('Magnetic Field Strength\n(normalized to mu/(4*pi))')
