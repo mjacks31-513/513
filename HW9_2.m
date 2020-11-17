@@ -26,8 +26,9 @@ for i = 1:900
     if i > Mx
         k = min(i,Nx)-Mx;
         E_transmit(2:k) = E_transmit(1:k-1);
-        % this a ghetto attempt at getting the transmitted wave
-        E_transmit(1) = (1-(1-abs(rho))/(1+abs(rho)))*Ei(Mx);
+        % based on the fdtd code you gave us before, the frequency changes
+        % when it hits a boundary, but I am not able to reproduce that
+        E_transmit(1) = E_total(Mx);        
     end
     
     % Plot current time step as light grey.
