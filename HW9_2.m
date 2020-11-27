@@ -3,6 +3,14 @@ x = [1:Nx];
 lambda = 100;
 Mx = 300;  % I am going to keep the boundary at 300
 
+% What you've done is a little more advanced than I was looking for.
+% You have computed the fully analytic solution a wave reflected off of a
+% boundary at ix = 300. To fully answer the question, you would need to
+% do a simulation with the the reflection at ix = 550. The idea of this
+% problem, which perhaps was not clear, is to "see" the wave that
+% is associated with the VSWR by plotting two waves traveling in opposing 
+% directions. 
+
 % I am preallocating my reflected wave to match the domain
 E_reflected = NaN(1, Mx);
 E_transmit = NaN(1,Nx-Mx);
