@@ -4,15 +4,22 @@ import matplotlib.animation as animation
 
 
 if __name__=="__main__":
-# V_total = np.zeros_like(x, dtype=complex)
+    # V_total = np.zeros_like(x, dtype=complex)
     Mx = Nx = 1000
     x = np.arange(Nx)
-    lam = 1300
+    w = 0.005
+    L = 1
+    C = 1
+    lam = 2*np.pi/w
+    ## animate 1 = animation window
+    ## animate 2 = 2 plots at 0 and Pi/2
+    ## animate 3 = 1000 iterations VSWR check
+    animate = 1
 
     # Z_0 is the static impedance in the transmission line
     Z_0 = 1 + 0j  # This is defined as np.sqrt(L/C)
     # Z_L is the static impedance in the load line
-    Z_L = 5+0j
+    Z_L = 3+0j
     # This is my constant rho value
     rho_0 = (Z_L - Z_0)/(Z_L + Z_0)
     # global Vi
@@ -36,39 +43,69 @@ if __name__=="__main__":
     V_plot, = ax1.plot(np.real(V_i), label='Voltage')
     I_plot, = ax1.plot(np.real(I_i), label='Current')
     Z_plot, = ax1.plot(np.real(Z_i), label='Impedance')
-    ax1.set_ylim([-3, 3])
+    plt.autoscale()
     ax1.legend()
-    animate = True
 
 
-    def animateFunc(iii):
+    def animateFunc(iii, V_0=None):
         # e^(wt)
-        V_0 = np.exp(0.005j*iii*50)
+        if V_0 is None:
+            V_0 = np.exp(0.005j * iii * 50)
         # if complex(Z_L) == complex(Z_0):
         #     rho = np.full_like(x, rho_0, dtype=complex)
         # else:
+        global rho
         rho = rho_0 * np.exp(4j * np.pi * (x - Nx + 1) / lam)
 
         V_i[:] = V_0 * np.exp(-2j*np.pi*(x-Nx+1)/lam)*(1 + rho)
         I_i[:] = V_0/Z_0 * np.exp(-2j*np.pi*(x-Nx+1)/lam) * (1-rho)
         Z_i[:] = V_i/I_i
 
-        if animate:
+        if animate == 1:
             V_plot.set_ydata(np.real(V_i))
             I_plot.set_ydata(np.real(I_i))
             Z_plot.set_ydata(np.real(Z_i))
+            if iii == 0:
+                ax1.relim()
+                ax1.autoscale_view()
+                plt.draw()
             return V_plot, I_plot, Z_plot
 
 
-    if animate:
+    if animate == 1:
         ani = animation.FuncAnimation(
             fig, animateFunc, interval=200, blit=True, save_count=10)
+        ax1.relim()
+        ax1.autoscale_view()
+    elif animate == 2:
+        plt.close(fig)
+        fig2, (ax21, ax22) = plt.subplots(2, 1)
+        fig2.suptitle('Analytical')
+
+        V_0 = 1 + 0j
+        animateFunc(0, 1)
+        V_plot1, = ax21.plot(np.real(V_i), label='Voltage')
+        I_plot1, = ax21.plot(np.real(I_i), label='Current')
+        Z_plot1, = ax21.plot(np.real(Z_i), label='Impedance')
+        ax21.set_title('Values at 0')
+        ax21.legend()
+        plt.autoscale()
+
+        V_1 = np.exp(1j*np.pi/2)
+        animateFunc(0, V_1)
+        V_plot2, = ax22.plot(np.real(V_i), label='Voltage')
+        I_plot2, = ax22.plot(np.real(I_i), label='Current')
+        Z_plot2, = ax22.plot(np.real(Z_i), label='Impedance')
+        ax22.legend()
+        ax22.set_title('Values at $\pi / (2 \omega)$')
+        plt.autoscale()
     else:
         V_max = np.empty(1000)
         for iii in range(1000):
             animateFunc(iii)
             V_max[iii] = np.abs(np.real(V_i)).max()
-
+        ax1.clear()
         V_plot, = ax1.plot(np.real(V_i), label='Voltage')
         I_plot, = ax1.plot(np.real(I_i), label='Current')
         Z_plot, = ax1.plot(np.real(Z_i), label='Impedance')
+        ax1.legend()
