@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 global SCALING_FACTOR_ON
-SCALING_FACTOR_ON = true
+SCALING_FACTOR_ON = True
 
 def ladderCircuit(w, L, C, N, Z_L, V_0):
     Z_total = np.empty(N, dtype=complex)  # I am going to test this
