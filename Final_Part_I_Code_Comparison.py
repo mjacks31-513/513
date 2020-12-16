@@ -244,7 +244,7 @@ if __name__ == '__main__':
         axlist = []
         datalist = []
         datalist2 = []
-        for ww in [0.005]:#, 0.02, 0.1, 0.5, 2]:
+        for ww in [0.005 , 0.02, 0.1, 0.5, 2]:
             V_0 = 1
             newdata = ladderCircuit(ww, 1, 1, 1000, 1, V_0)
             lam = 2*np.pi/ww
