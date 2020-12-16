@@ -2,8 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-global SCALING_FACTOR_ON
-SCALING_FACTOR_ON = False
+
+## ANIMATE 1 = animation window
+## ANIMATE 2 = 2 plots at 0 and Pi/2
+## ANIMATE 3 = 1000 iterations VSWR
+## ANIMATE 4 = look at changing omega
+global ANIMATE
+ANIMATE = 4
 
 def ladderCircuit(w, L, C, N, Z_L, V_0):
     Z_total = np.empty(N, dtype=complex)  # I am going to test this
@@ -17,10 +22,6 @@ def ladderCircuit(w, L, C, N, Z_L, V_0):
     # I am not including V_0 in my V_total.
     # The reason I am doing this is because it makes my loop look nicer.
     # I am going to scale my V_0
-    if SCALING_FACTOR_ON:
-        rho = (Z_total[0]-1)/(Z_total[0]+1)
-        coeff = np.exp(2j*np.pi * N * (w*np.sqrt(L*C))**-1)
-        V_0 = V_0 * coeff * (1+rho)
     I_total[0] = V_0/Z_total[0]
     V_total[0] = V_0 - 1j*w*L*I_total[0]
     for n in range(0, N-1):
@@ -37,20 +38,16 @@ if __name__ == '__main__':
     C = 1  # F
     w = 0.005  # s**-1
     N = 1000  #
-    Z_L = (5*(L/C) ** 0.5 + 0j)
+    Z_L = ((L/C) ** 0.5 + 0j)
 
     ## These are inputs for my analytical solution
     x = np.arange(N)
     lam = 2 * np.pi / w
-    # Z_0 = (L/C)**5
-    Z_0 = ((L/C) - (w ** 2 * L ** 2 / 4)) ** 0.5
+    Z_0 = (L/C)**5
     rho_0 = (Z_L - Z_0)/(Z_L + Z_0)
 
 
-    ## animate 1 = animation window
-    ## animate 2 = 2 plots at 0 and Pi/2
-    ## animate 3 = 1000 iterations VSWR
-    animate = 1
+
 
     # Z_L = np.exp(1j * np.pi / 4)
     output = ladderCircuit(w, L, C, N, Z_L, V_0)
@@ -124,7 +121,7 @@ if __name__ == '__main__':
 
         differenceData = ladderData - np.real(analyticalData)
 
-        if animate == 1:
+        if ANIMATE == 1:
             line_V.set_ydata(np.real(newYdata['V']))  # update the data.
             line_I.set_ydata(np.real(newYdata['I']))  # update the data.
             line_Z.set_ydata(np.real(newYdata['Z']))  # update the data.
@@ -157,7 +154,7 @@ if __name__ == '__main__':
 
             return emptyPlot
 
-        # if animate == 1:
+        # if ANIMATE == 1:
         #     if iii == 0:
         #         ax1.relim()
         #         ax1.autoscale_view()
@@ -165,13 +162,13 @@ if __name__ == '__main__':
         #     return line_V, line_I, line_Z
 
 
-    if animate == 1:
+    if ANIMATE == 1:
         ani = animation.FuncAnimation(
             fig, animateFunc, interval=200, blit=True, save_count=10)
-    elif animate == 2:
+    elif ANIMATE == 2:
         plt.close(fig)
-        fig2, ((ax21, ax22), (ax23, ax24)) = plt.subplots(2, 2)
-        fig2.suptitle('Ladder Circuit')
+        fig2, ((ax21, ax22), (ax23, ax24), (ax25, ax26)) = plt.subplots(3, 2)
+        fig2.suptitle('Ladder Circuit - Analytical - Difference\nWith Load: {}'.format(Z_L))
 
         newYdata1 = ladderCircuit(w, L, C, N, Z_L, V_0)
         animateFunc(0,1)
@@ -180,14 +177,27 @@ if __name__ == '__main__':
         I_plot1, = ax21.plot(np.real(newYdata1['I']), label='Current')
         Z_plot1, = ax21.plot(np.real(newYdata1['Z']), label='Impedance')
         ax21.set_title('Values at 0')
+        ax21.set_ylabel('Ladder Circuit')
         ax21.legend()
         plt.autoscale()
 
         V_plot1, = ax23.plot(np.real(V_i), label='Voltage')
         I_plot1, = ax23.plot(np.real(I_i), label='Current')
         Z_plot1, = ax23.plot(np.real(Z_i), label='Impedance')
+        ax23.set_ylabel('Analytical')
         ax23.legend()
         plt.autoscale()
+
+        V_plot1, = ax25.plot(np.real(newYdata1['V']) - np.real(V_i), label='V Difference')
+        I_plot1, = ax25.plot(np.real(newYdata1['I']) - np.real(I_i), label='I Difference')
+        Z_plot1, = ax25.plot(np.real(newYdata1['Z']) - np.real(Z_i), label='Z Difference')
+        ax25.set_ylabel('Difference')
+        ax25.legend()
+        plt.autoscale()
+
+        differenceData[:, 0] = np.real(newYdata1['V']) - np.real(V_i)
+        differenceData[:, 1] = np.real(newYdata1['I']) - np.real(I_i)
+        differenceData[:, 2] = np.real(newYdata1['Z']) - np.real(Z_i)
 
         V_1 = np.exp(1j*np.pi/2)
         animateFunc(0, V_1)
@@ -206,7 +216,19 @@ if __name__ == '__main__':
         ax24.legend()
         plt.autoscale()
 
-    else:
+        V_plot1, = ax26.plot(np.real(newYdata2['V']) - np.real(V_i), label='V Difference')
+        I_plot1, = ax26.plot(np.real(newYdata2['I']) - np.real(I_i), label='I Difference')
+        Z_plot1, = ax26.plot(np.real(newYdata2['Z']) - np.real(Z_i), label='Z Difference')
+        ax26.legend()
+        plt.autoscale()
+
+        differenceData2 = np.empty_like(differenceData)
+        differenceData2[:, 0] = np.real(newYdata2['V']) - np.real(V_i)
+        differenceData2[:, 1] = np.real(newYdata2['I']) - np.real(I_i)
+        differenceData2[:, 2] = np.real(newYdata2['Z']) - np.real(Z_i)
+
+
+    elif ANIMATE == 3:
         V_max = np.empty(1000)
         for iii in range(1000):
             V_t = np.exp(1j * 0.005 * iii * 2)  # The extra 50 is to make the solution animate faster
@@ -217,3 +239,43 @@ if __name__ == '__main__':
         Line_I, = ax1.plot(newYdata['I'], label='Current')
         line_Z, = ax1.plot(newYdata['Z'], label='Impedance')
         ax1.legend()
+    elif ANIMATE == 4:
+        figlist = []
+        axlist = []
+        datalist = []
+        datalist2 = []
+        for ww in [0.005]:#, 0.02, 0.1, 0.5, 2]:
+            V_0 = 1
+            newdata = ladderCircuit(ww, 1, 1, 1000, 1, V_0)
+            lam = 2*np.pi/ww
+            animateFunc(0, 1)
+            datalist.append(newdata)
+            datalist2.append(analyticalData)
+            fig2, ax = plt.subplots(3, 1)
+            ax21, ax23, ax25 = ax
+            figlist.append(fig)
+            axlist.append(ax)
+            Z_0 = np.sqrt((L / C))
+            fig2.suptitle('Ladder Circuit - Analytical - Difference\nWith $\omega$: {} Z_L: {} Z_O: {}'.format(ww, Z_L, np.round(Z_0,3)))
+
+            V_i, I_i, Z_i = analyticalData.T
+            V_plot1, = ax21.plot(np.real(newdata['V']), label='Voltage')
+            I_plot1, = ax21.plot(np.real(newdata['I']), label='Current')
+            Z_plot1, = ax21.plot(np.real(newdata['Z']), label='Impedance')
+            ax21.set_ylabel('Ladder Circuit')
+            ax21.legend()
+            plt.autoscale()
+
+            V_plot1, = ax23.plot(np.real(V_i), label='Voltage')
+            I_plot1, = ax23.plot(np.real(I_i), label='Current')
+            Z_plot1, = ax23.plot(np.real(Z_i), label='Impedance')
+            ax23.set_ylabel('Analytical')
+            ax23.legend()
+            plt.autoscale()
+
+            V_plot1, = ax25.plot(np.real(newdata['V']) - np.real(V_i), label='V Difference')
+            I_plot1, = ax25.plot(np.real(newdata['I']) - np.real(I_i), label='I Difference')
+            Z_plot1, = ax25.plot(np.real(newdata['Z']) - np.real(Z_i), label='Z Difference')
+            ax25.set_ylabel('Difference')
+            ax25.legend()
+            plt.autoscale()

@@ -2,8 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-global SCALING_FACTOR_ON
-SCALING_FACTOR_ON = False
+## ANIMATE 1 = animation window
+## ANIMATE 2 = 2 plots at 0 and Pi/2
+## ANIMATE 3 = 1000 iterations VSWR
+## ANIMATE 4 = look at changing omega
+global ANIMATE
+ANIMATE = 1
 
 def ladderCircuit(w, L, C, N, Z_L, V_0):
     Z_total = np.empty(N, dtype=complex)  # I am going to test this
@@ -32,11 +36,7 @@ if __name__ == '__main__':
     C = 1  # F
     w = 5E-3  # s**-1
     N = 1000  #
-    Z_L = (3*(L/C) ** 0.5 + 0j)
-    ## animate 1 = animation window
-    ## animate 2 = 2 plots at 0 and Pi/2
-    ## animate 3 = 1000 iterations VSWR
-    animate = 2
+    Z_L = (1*(L/C) ** 0.5 + 0j)
     # Z_L = np.exp(1j * np.pi / 4)
     output = ladderCircuit(w, L, C, N, Z_L, V_0)
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         # I am interested in giving this a try, but I am not sure it'll work
         V_t = np.exp(1j * 0.005 * i * 50)  #The extra 50 is to make the solution animate faster
         newYdata = ladderCircuit(w, L, C, N, Z_L, V_t)
-        if animate == 1:
+        if ANIMATE == 1:
             line_V.set_ydata(np.real(newYdata['V']))  # update the data.
             line_I.set_ydata(np.real(newYdata['I']))  # update the data.
             line_Z.set_ydata(np.real(newYdata['Z']))  # update the data.
@@ -64,19 +64,19 @@ if __name__ == '__main__':
                 plt.draw()
             return line_V, line_I, line_Z
 
-    if animate == 1:
+    if ANIMATE == 1:
         ani = animation.FuncAnimation(
             fig, animateFunc, interval=200, blit=True, save_count=10)
-    elif animate == 2:
+    elif ANIMATE == 2:
         plt.close(fig)
         fig2, (ax21, ax22) = plt.subplots(2, 1)
-        fig2.suptitle('Ladder Circuit')
+        fig2.suptitle('Ladder Circuit with Load: {}'.format(Z_L))
 
         newYdata1 = ladderCircuit(w, L, C, N, Z_L, V_0)
         V_plot1, = ax21.plot(np.real(newYdata1['V']), label='Voltage')
         I_plot1, = ax21.plot(np.real(newYdata1['I']), label='Current')
         Z_plot1, = ax21.plot(np.real(newYdata1['Z']), label='Impedance')
-        ax21.set_title('Values at 0')
+        ax21.set_title('Values at t=0')
         ax21.legend()
         plt.autoscale()
 
@@ -86,9 +86,9 @@ if __name__ == '__main__':
         I_plot2, = ax22.plot(np.real(newYdata2['I']), label='Current')
         Z_plot2, = ax22.plot(np.real(newYdata2['Z']), label='Impedance')
         ax22.legend()
-        ax22.set_title('Values at $\pi / (2 \omega)$')
+        ax22.set_title('Values at t=$\pi / (2 \omega)$')
         plt.autoscale()
-    else:
+    elif ANIMATE == 3:
         V_max = np.empty(1000)
         for iii in range(1000):
             V_t = np.exp(1j * 0.005 * iii * 2)  # The extra 50 is to make the solution animate faster
@@ -99,3 +99,10 @@ if __name__ == '__main__':
         Line_I, = ax.plot(newYdata['I'], label='Current')
         line_Z, = ax.plot(newYdata['Z'], label='Impedance')
         ax.legend()
+    elif ANIMATE == 4:
+        figlist = []
+        axlist = []
+        datalist = []
+        for ww in np.arange(0.005,0.1,0.02):
+            data = ladderCircuit(ww, 1, 1, 1000, 1, 1)
+            datalist.append(data)

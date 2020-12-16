@@ -2,6 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+## ANIMATE 1 = animation window
+## ANIMATE 2 = 2 plots at 0 and Pi/2
+## ANIMATE 3 = 1000 iterations VSWR
+## ANIMATE 4 = look at changing omega
+global ANIMATE
+ANIMATE = 1
 
 if __name__=="__main__":
     # V_total = np.zeros_like(x, dtype=complex)
@@ -11,15 +17,11 @@ if __name__=="__main__":
     L = 1
     C = 1
     lam = 2*np.pi/w
-    ## animate 1 = animation window
-    ## animate 2 = 2 plots at 0 and Pi/2
-    ## animate 3 = 1000 iterations VSWR check
-    animate = 2
 
     # Z_0 is the static impedance in the transmission line
     Z_0 = 1 + 0j  # This is defined as np.sqrt(L/C)
     # Z_L is the static impedance in the load line
-    Z_L = 3+0j
+    Z_L = 1+0j
     # This is my constant rho value
     rho_0 = (Z_L - Z_0)/(Z_L + Z_0)
     # global Vi
@@ -63,7 +65,7 @@ if __name__=="__main__":
         I_i[:] = V_c/Z_0 * np.exp(-2j*np.pi*x/lam) * (1-rho)
         Z_i[:] = V_i/I_i
 
-        if animate == 1:
+        if ANIMATE == 1:
             V_plot.set_ydata(np.real(V_i))
             I_plot.set_ydata(np.real(I_i))
             Z_plot.set_ydata(np.real(Z_i))
@@ -74,23 +76,23 @@ if __name__=="__main__":
             return V_plot, I_plot, Z_plot
 
 
-    if animate == 1:
+    if ANIMATE == 1:
         ax1.set_title('Analytical')
         ani = animation.FuncAnimation(
             fig, animateFunc, interval=200, blit=True, save_count=10)
         ax1.relim()
         ax1.autoscale_view()
-    elif animate == 2:
+    elif ANIMATE == 2:
         plt.close(fig)
         fig2, (ax21, ax22) = plt.subplots(2, 1)
-        fig2.suptitle('Analytical')
+        fig2.suptitle('Analytical with Load: {}'.format(Z_L))
 
         V_0 = 1 + 0j
         animateFunc(0, 1)
         V_plot1, = ax21.plot(np.real(V_i), label='Voltage')
         I_plot1, = ax21.plot(np.real(I_i), label='Current')
         Z_plot1, = ax21.plot(np.real(Z_i), label='Impedance')
-        ax21.set_title('Values at 0')
+        ax21.set_title('Values at t=0')
         ax21.legend()
         plt.autoscale()
 
@@ -100,9 +102,9 @@ if __name__=="__main__":
         I_plot2, = ax22.plot(np.real(I_i), label='Current')
         Z_plot2, = ax22.plot(np.real(Z_i), label='Impedance')
         ax22.legend()
-        ax22.set_title('Values at $\pi / (2 \omega)$')
+        ax22.set_title('Values at t=$\pi / (2 \omega)$')
         plt.autoscale()
-    else:
+    elif ANIMATE == 3:
         V_max = np.empty(1000)
         for iii in range(1000):
             animateFunc(iii)
