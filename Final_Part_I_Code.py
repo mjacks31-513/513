@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 global SCALING_FACTOR_ON
-SCALING_FACTOR_ON = True
+SCALING_FACTOR_ON = False
 
 def ladderCircuit(w, L, C, N, Z_L, V_0):
     Z_total = np.empty(N, dtype=complex)  # I am going to test this
@@ -17,10 +17,6 @@ def ladderCircuit(w, L, C, N, Z_L, V_0):
     # I am not including V_0 in my V_total.
     # The reason I am doing this is because it makes my loop look nicer.
     # I am going to scale my V_0
-    if SCALING_FACTOR_ON:
-        rho = (Z_total[0]-1)/(Z_total[0]+1)
-        coeff = np.exp(2j*np.pi * N * (w*np.sqrt(L*C))**-1)
-        V_0 = V_0 * coeff * (1+rho)
     I_total[0] = V_0/Z_total[0]
     V_total[0] = V_0 - 1j*w*L*I_total[0]
     for n in range(0, N-1):
@@ -40,7 +36,7 @@ if __name__ == '__main__':
     ## animate 1 = animation window
     ## animate 2 = 2 plots at 0 and Pi/2
     ## animate 3 = 1000 iterations VSWR
-    animate = 1
+    animate = 2
     # Z_L = np.exp(1j * np.pi / 4)
     output = ladderCircuit(w, L, C, N, Z_L, V_0)
 

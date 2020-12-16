@@ -14,7 +14,7 @@ if __name__=="__main__":
     ## animate 1 = animation window
     ## animate 2 = 2 plots at 0 and Pi/2
     ## animate 3 = 1000 iterations VSWR check
-    animate = 1
+    animate = 2
 
     # Z_0 is the static impedance in the transmission line
     Z_0 = 1 + 0j  # This is defined as np.sqrt(L/C)
@@ -57,8 +57,10 @@ if __name__=="__main__":
         global rho
         rho = rho_0 * np.exp(4j * np.pi * (x - Nx + 1) / lam)
 
-        V_i[:] = V_0 * np.exp(-2j*np.pi*(x-Nx+1)/lam)*(1 + rho)
-        I_i[:] = V_0/Z_0 * np.exp(-2j*np.pi*(x-Nx+1)/lam) * (1-rho)
+        # I need to maintain the source voltage
+        V_c = V_0 / (1 + rho[0])
+        V_i[:] = V_c * np.exp(-2j*np.pi*x/lam)*(1 + rho)
+        I_i[:] = V_c/Z_0 * np.exp(-2j*np.pi*x/lam) * (1-rho)
         Z_i[:] = V_i/I_i
 
         if animate == 1:
@@ -73,6 +75,7 @@ if __name__=="__main__":
 
 
     if animate == 1:
+        ax1.set_title('Analytical')
         ani = animation.FuncAnimation(
             fig, animateFunc, interval=200, blit=True, save_count=10)
         ax1.relim()
